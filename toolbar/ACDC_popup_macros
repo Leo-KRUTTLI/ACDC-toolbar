@@ -1,0 +1,51 @@
+<noGrid>
+<popup>
+
+<line>
+
+-----------
+
+<button>
+label=cilia length
+icon=noicon
+arg=runMacro("ACDC macro/cilia length v2.ijm");
+
+------------
+
+<button>
+label=CentrioleDim
+icon=noicon
+arg=runMacro("ACDC macro/CentrioleDim.ijm");
+
+------------
+
+<button>
+label=Prot-intensity
+icon=noicon
+arg=runMacro("ACDC macro/Prot-intensity.ijm");
+------------
+
+<button>
+label=Prot-intensity
+icon=noicon
+arg=runMacro("https://raw.githubusercontent.com/Leo-KRUTTLI/MCZ-marco/main/MACRO%20MCZ%20V3.4.ijm");
+
+<button>
+label=Lancer Macro GitHub
+icon=noicon
+arg=<macro>
+// 1. Définir l'URL du fichier RAW
+url = "https://raw.githubusercontent.com/Leo-KRUTTLI/MCZ-marco/refs/heads/main/MACRO%20MCZ%20V3.4.ijm";
+
+// 2. Récupérer le contenu
+code = File.openUrlAsString(url);
+
+// 3. Vérifier si le téléchargement a réussi avant d'exécuter
+if (startsWith(code, "<Error")) {
+    exit("Impossible de joindre GitHub. Vérifiez votre connexion.");
+} else {
+    eval(code);
+}
+</macro>
+
+
