@@ -251,7 +251,6 @@ label=MCZ
 icon=noicon
 arg=<macro>
 
-//
 // Determine the image processing steps to run 
 Dialog.create("Choice of steps");
 Dialog.addMessage("Choose your steps");
@@ -272,17 +271,13 @@ showMessage("click on *OK* to choose input folder");
 input1 = getDirectory("choose input folder"); // Choose the folder with bases image
 print(input1);
 
-showMessage("click on *OK* to choose output folder");
-output1 = getDirectory("choose output folder"); // Choose the folder with bases image
-print(output1);
-
 
 list1 = getFileList(input1);
 
 options = newArray("Red", "Green", "Blue", "Magenta", "Yellow", "Cyan", "Grays", "None");
 channels = newArray("Channel 1", "Channel 2", "Channel 3", "Channel 4", "Channel 5");
 
-option = newArray("TIF", "ND", "LIF");
+option = newArray("TIF", "ND", "LIF", "OBF");
 
 Dialog.create("Choose image type");
 Dialog.addMessage("Select the image type");
@@ -293,11 +288,15 @@ imageTypeChoice = Dialog.getChoice();
 	
 	ndCount = 0 ;
 	tifCount = 0 ;
+	obfCount= 0 ;
 	
 for (i=0; i<list1.length; i++){
 	
 // for TIF
 if (imageTypeChoice == "TIF") {
+	showMessage("click on *OK* to choose output folder");
+output1 = getDirectory("choose output folder"); // Choose the folder with bases image
+print(output1);
 	
 	if (endsWith(list1[i], ".tif") ) {
 		tifCount++;
@@ -341,6 +340,9 @@ if (imageTypeChoice == "TIF") {
 // for LIF
 if (imageTypeChoice == "LIF") {
 	if (endsWith(list1[i], ".lif") ) {
+		showMessage("click on *OK* to choose output folder");
+output1 = getDirectory("choose output folder"); // Choose the folder with bases image
+print(output1);
                 
 var svccCounter = 0;
     file = input1 + list1[i];
@@ -408,6 +410,9 @@ run("Close All");
 }
 // for ND
 if (imageTypeChoice == "ND") {
+	showMessage("click on *OK* to choose output folder");
+output1 = getDirectory("choose output folder"); // Choose the folder with bases image
+print(output1);
 
 		if (endsWith(list1[i], ".nd") ) {
 			ndCount++;
@@ -446,8 +451,144 @@ setBatchMode(true); //turn on batch mode.
 		run("Close All");
 	}
 	}
+	
+	if (imageTypeChoice == "OBF") {
+    if (endsWith(list1[i], ".obf")) {
+    	
+    	run("Bio-Formats Macro Extensions");
+    	showMessage("click on *OK* to choose output folder");
+output1 = getDirectory("choose output folder"); // Choose the folder with bases image
+print(output1);
+        
+        cheminFichier = input1 + list1[i];
+        
+        imagetitle = File.getNameWithoutExtension(cheminFichier);
+        
+        // Initialise Bio-Formats sur ce fichier pour lire ses métadonnées
+        Ext.setId(cheminFichier);
+        
+        // Récupère automatiquement le nombre total de séries
+        Ext.getSeriesCount(nSeries);
+        
+nChannels = 0;
+firstSeriesRoot = "";
+
+// On active le mode batch pour que l'utilisateur ne voie pas les images s'ouvrir et se fermer
+setBatchMode(true);
+
+// On va juste tester les 6 premières séries (on n'a pas besoin de tester les 300)
+for (testIdx = 1; testIdx <= 6; testIdx++) {
+    
+    // 1. On ouvre temporairement la série en cours
+    optionsTest = "open=[" + cheminFichier + "] autoscale color_mode=Grayscale view=Hyperstack stack_order=XYCZT series_" + testIdx;
+    run("Bio-Formats Importer", optionsTest);
+    
+    // 2. On récupère le VRAI titre de la fenêtre ouverte (Garanti 100% String)
+    vraiNomImage = getTitle(); 
+    
+    print("Série " + testIdx + " ouverte. Titre détecté : " + vraiNomImage);
+    
+    if (testIdx == 1) {
+        // On extrait la racine du titre de la première image
+        if (lengthOf(vraiNomImage) > 10) {
+            firstSeriesRoot = substring(vraiNomImage, 0, lengthOf(vraiNomImage) - 10);
+        } else {
+            firstSeriesRoot = vraiNomImage;
+        }
+        print("-> Racine mémorisée : " + firstSeriesRoot);
+        
+        close(); // On referme l'image test
+    } 
+    else {
+        // On compare le titre de l'image actuelle avec la racine de la première
+        if (!startsWith(vraiNomImage, firstSeriesRoot)) {
+            close(); // On referme l'image test avant de partir
+            print("-> [STOP] Changement de groupe détecté à la série : " + testIdx);
+            break; // Rupture ! On sort de la boucle de test
+        }
+        close(); // On referme l'image test
+    }
+    nChannels++;
 }
+
+setBatchMode(false); // On désactive le mode batch pour la suite
+
+print("==> Détection automatique réussie : " + nChannels + " canaux détectés par groupe.");
+close("*");
+
+        indexMerge = 1;
+        
+        // 4. Boucle principale qui avance de 3 en 3
+        for (s = 0; s < nSeries; s += nChannels) {
+        	obfCount++;
+            setBatchMode(true);
+            
+            // --- OUVERTURE DYNAMIQUE DES SÉRIES ---
+            for (ch = 0; ch < nChannels; ch++) {
+                seriesIndex = s + ch + 1; // Index de la série à ouvrir (commence à 1)
+                
+                // On s'assure qu'on ne dépasse pas le nombre total de séries disponibles
+                if (seriesIndex <= nSeries) {
+                    optionsCh = "open=[" + cheminFichier + "] autoscale color_mode=Grayscale view=Hyperstack stack_order=XYCZT series_" + seriesIndex;
+                    run("Bio-Formats Importer", optionsCh);
+                    rename("C" + (ch + 1)); // Renomme dynamiquement C1, C2, C3, C4...
+                }
+            }
+            
+            // --- CONSTRUCTION DE LA COMMANDE DE FUSION (MERGE) ---
+            mergeString = "";
+            for (ch = 0; ch < nChannels; ch++) {
+                mergeString += "c" + (ch + 1) + "=C" + (ch + 1) + " ";
+            }
+            mergeString += "create"; // Exemple final : "c1=C1 c2=C2 c3=C3 c4=C4 create"
+            
+            // Exécution du merge avec la chaîne construite à la volée
+            run("Merge Channels...", mergeString);
+            
+            
+            
+            if (obfCount == 1) {
+ 	setBatchMode(false); //turn off batch mode.
+ 	run("Channels Tool...");
+                    waitForUser("Note your channels color \nThen press OK");
+                    Dialog.create("Merge channels");
+                    Dialog.addMessage("Choose the color for your channels");
+                    for (k = 0; k < nChannels; k++) {
+                        Dialog.addChoice(channels[k], options, options[7]);
+                    }
+                    Dialog.show();
+                    channelColors = newArray();
+                    for (k = 0; k < nChannels; k++) {
+                        channelColors[k] = Dialog.getChoice();
+                    }
+                    selectWindow("Channels");
+                    run("Close");
+                    setBatchMode(true);
+                }
+                
+            for (k = 0; k < nChannels; k++) {
+                    if (channelColors[k] != "none") {
+                        Stack.setChannel(k + 1);
+                        run(channelColors[k]);
+                    }
+                }
+            // --- SAUVEGARDE ---
+            // CORRECTION 2 : Ajout de la parenthèse fermante manquante à la fin de la ligne
+            saveAs("Tiff", output1 + "MERGE_" + imagetitle + "_" + indexMerge + ".tif");
+            
+            // Force la fermeture de l'image fusionnée avant le groupe suivant
+            close();
+            run("Close All");
+            
+            // On augmente l'index pour le prochain groupe
+            indexMerge++;
+        }
+    }
 }
+}	
+	setBatchMode(false);
+}
+
 
 
 // CROP
@@ -492,7 +633,7 @@ for (i=0; i<list2.length; i++){
 	if (imageTypeChoice == "TIF") {
 	if (endsWith(list2[i], ".tif") ) {
     open(input2 + list2[i]);
-    imageTitle = getTitle;
+    imageTitle = getTitle();
 crop(imageTitle);
 }}
 
@@ -500,7 +641,7 @@ crop(imageTitle);
     if (imageTypeChoice == "ND") {
 	if (endsWith(list2[i], ".nd") ) {
 run("Bio-Formats Importer", "open=[" + input2 + list2[i] + "] autoscale color_mode=Composite view=Hyperstack stack_order=XYCZT");
-imageTitle = getTitle;
+imageTitle = getTitle();
 crop(imageTitle);
 }}
     
@@ -515,18 +656,18 @@ Ext.getSeriesCount(nSeries);
 seriesToOpen = newArray(nSeries);  // Initialisation du tableau avec une taille appropriée
 sIdx = 0;
 // Boucle pour ajouter toutes les séries à ouvrir
-for (i = 0; i < nSeries; i++) {
-    seriesToOpen[sIdx++] = i + 1;  // Ajouter toutes les séries, en utilisant un index ajusté de +1
+for (j = 0; j < nSeries; j++) {
+    seriesToOpen[sIdx++] = j + 1;  // Ajouter toutes les séries, en utilisant un index ajusté de +1
 }
 Array.print(seriesToOpen);
 for (s = 0; s < seriesToOpen.length; s++) {
     run("Bio-Formats Importer", "open=[" + file + "] autoscale color_mode=Composite rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT series_list=" + seriesToOpen[s]);
-imageTitle = getTitle;
+imageTitle = getTitle();
 crop(imageTitle);
 }}}
  
     function crop(imageTitle) {
-    originalImageTitle = getTitle;
+    originalImageTitle = getTitle();
     		imageTitle2 = File.nameWithoutExtension;
     		getDimensions(w, h, c, z, t);
 
@@ -746,7 +887,6 @@ File.saveString(csvContent, filePath);
 }
 }
 }
-//
 
 </macro>
 
