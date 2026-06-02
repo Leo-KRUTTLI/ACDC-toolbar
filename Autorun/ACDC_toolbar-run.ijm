@@ -64,3 +64,31 @@ File.close(f);
 
 // 4. L'ÉTAPPE MAGIQUE : On installe ce bouton directement dans la barre d'outils
 run("Install...", "install=[" + tempFile + "]");
+
+
+// =========================================================================
+// Téléchargement popup toolbar
+// =========================================================================
+
+// 1. URL et Chemins universels
+url = "https://raw.githubusercontent.com/Leo-KRUTTLI/ACDC-toolbar/refs/heads/main/toolbar/ACDC_popup_macros.txt";
+dirActionBar = getDirectory("plugins") + "ActionBar" + File.separator;
+fileName = "ACDC_popup_macros.txt";
+fullPath = dirActionBar + fileName;
+
+// 2. Tentative de mise à jour
+code = File.openUrlAsString(url);
+
+if (startsWith(code, "<Error") || code == "") {
+    // Si échec (pas d'internet), on vérifie si on a déjà une version locale
+    if (File.exists(fullPath)) {
+        showStatus("Mode Hors-ligne : Popup local chargé.");
+    } else {
+        exit("Erreur : Connexion requise pour le premier téléchargement du popup.");
+    }
+} else {
+    // Si succès, on enregistre/écrase la version locale avec la nouvelle
+    if (!File.exists(dirActionBar)) { File.makeDirectory(dirActionBar); }
+    File.saveString(code, fullPath);
+    showStatus("Popup ACDC mis à jour !");
+}
