@@ -1,0 +1,29 @@
+// =========================================================================
+// SCRIPT AUTORUN : GÉNÉRATEUR DYNAMIQUE DE BOUTON
+// =========================================================================
+
+// 1. On récupère la liste de tes macros
+macroDir = getDirectory("macros");
+rawlist = getFileList(macroDir);
+
+// 2. On fabrique le tableau des options du menu
+menuItems = newArray("Open Macros Folder", "-");
+
+for (i = 0; i < rawlist.length; i++) {
+    if (endsWith(rawlist[i], ".ijm")) {
+        name = substring(rawlist[i], 0, lengthOf(rawlist[i]) - 4);
+        menuItems = Array.concat(menuItems, name);
+    }
+}
+
+// 3. On crée le menu et l'outil directement !
+var mCmds = newMenu("My Macros Menu Tool", menuItems);
+
+macro "My Macros Menu Tool - C070T0b11MT7b09ctTcb09r" {
+    cmd = getArgument();
+    if (cmd == "Open Macros Folder") { 
+        open(getDirectory("macros")); 
+    } else if (cmd != "-") { 
+        runMacro(getDirectory("macros") + cmd + ".ijm"); 
+    }
+}
