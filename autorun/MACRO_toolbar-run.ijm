@@ -1,8 +1,8 @@
 // 1. Chemins et URL
 url = "https://raw.githubusercontent.com/Leo-KRUTTLI/ACDC-toolbar/refs/heads/main/toolbar/MACRO_toolbar.txt";
-dirPlugins = getDirectory("plugins") + "ActionBar" + File.separator;
+dirmacros = getDirectory("macros") + "AutoRun" + File.separator;
 fileName = "MACRO_toolbar.txt";
-fullPath = dirPlugins + fileName;
+fullPath = dirmacros + fileName;
 
 // 2. TENTATIVE DE MISE À JOUR
 // On utilise une petite astuce : on tente le téléchargement
@@ -25,4 +25,4 @@ if (startsWith(code, "<Error") || code == "") {
 
 
 // 3. LANCEMENT (Dans tous les cas, on lance le fichier qui est sur le disque)
-run("Action Bar", "plugins/ActionBar/" + fileName);
+run("Action Bar", "macros/Autorun/" + fileName);
