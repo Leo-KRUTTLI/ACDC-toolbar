@@ -283,7 +283,7 @@ fileName = "MACRO_MCZ.ijm";
 fullPath = dirMacros + fileName;
 
 if (File.exists(fullPath)) {
-    run("Macro...", "fullPath");
+runMacro(fullPath);
 } else {
     showMessage("Erreur", "La macro n'a pas pu être trouvée dans " + dirMacros);
 }
