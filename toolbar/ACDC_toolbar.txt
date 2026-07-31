@@ -2,7 +2,7 @@
 <noGrid>
 <DnD> // allow droping images into the BoulinTab2 window to open them, just like Fiji tool bar
 
-<startup>
+<startupAction>
 // URL de la macro sur GitHub (en RAW)
 url = "https://raw.githubusercontent.com/Leo-KRUTTLI/MCZ-marco/refs/heads/main/MACRO%20MCZ%20update%20version.ijm";
 
@@ -25,7 +25,7 @@ if (startsWith(code, "<Error") || code == "") {
 }
 
 
-</startup>
+</startupAction>
 
 <line>
 <button>
@@ -336,3 +336,4 @@ icon=_ZoomBar/zoom-in.gif
 arg=run("In");
 
 </line>
+
