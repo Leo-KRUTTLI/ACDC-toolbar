@@ -7,20 +7,24 @@
 url = "https://raw.githubusercontent.com/Leo-KRUTTLI/MCZ-marco/refs/heads/main/MACRO%20MCZ%20update%20version.ijm";
 
 // Dossier de destination : ImageJ/macros/
-dirMacros = getDirectory("macros");
+dirMacros = getDirectory("macros") + File.separator;
 fileName = "MACRO_MCZ.ijm";
 fullPath = dirMacros + fileName;
 
-// Tentative de téléchargement depuis GitHub
-code = File.openUrlAsString(url);
-
-// Vérification si le téléchargement a réussi (si non vide et pas une page d'erreur 404)
-if (!startsWith(code, "<Error") && lengthOf(code) > 0) {
-    File.saveString(code, fullPath);
-    showStatus("Macro téléchargée et mise à jour dans Fiji !");
+if (startsWith(code, "<Error") || code == "") {
+    // ÉCHEC DU TÉLÉCHARGEMENT (Hors-ligne)
+    if (File.exists(fullPath)) {
+        print("Mode Hors-ligne : Chargement de la version locale.");
+    } else {
+        exit("Erreur : Première installation impossible sans connexion internet.");
+    }
 } else {
-    showStatus("Mode hors-ligne : impossible de télécharger la macro.");
+    // SUCCÈS : On enregistre la nouvelle version sur le disque
+    File.saveString(code, fullPath);
+    showStatus("macro mcz updated!");
 }
+
+
 </startup>
 
 <line>
@@ -270,7 +274,7 @@ label=MCZ
 icon=noicon
 arg=<macro>
 
-dirMacros = getDirectory("macros");
+dirMacros = getDirectory("macros") + File.separator;
 fileName = "MACRO_MCZ.ijm";
 fullPath = dirMacros + fileName;
 
@@ -332,4 +336,3 @@ icon=_ZoomBar/zoom-in.gif
 arg=run("In");
 
 </line>
-
