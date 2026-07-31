@@ -3,25 +3,29 @@
 <DnD> // allow droping images into the BoulinTab2 window to open them, just like Fiji tool bar
 
 <startupAction>
-// URL de la macro sur GitHub (en RAW)
+
+
 url = "https://raw.githubusercontent.com/Leo-KRUTTLI/MCZ-marco/refs/heads/main/MACRO%20MCZ%20update%20version.ijm";
 
-// Dossier de destination : ImageJ/macros/
-dirMacros = getDirectory("macros") + File.separator;
+dirMacros = getDirectory("macros"); // Ne pas ajouter File.separator ici
 fileName = "MACRO_MCZ.ijm";
 fullPath = dirMacros + fileName;
 
+// 2. RECUPERATION DU CODE (LIGNE INDISPENSABLE)
+code = File.openUrlAsString(url);
+
+// 3. VERIFICATION ET ENREGISTREMENT
 if (startsWith(code, "<Error") || code == "") {
     // ÉCHEC DU TÉLÉCHARGEMENT (Hors-ligne)
     if (File.exists(fullPath)) {
         print("Mode Hors-ligne : Chargement de la version locale.");
     } else {
-        exit("Erreur : Première installation impossible sans connexion internet.");
+        showMessage("Erreur", "Première installation impossible sans connexion internet.");
     }
 } else {
-    // SUCCÈS : On enregistre la nouvelle version sur le disque
+    // SUCCÈS : Enregistrement sur le disque
     File.saveString(code, fullPath);
-    showStatus("macro mcz updated!");
+    showStatus("Macro MCZ mise à jour avec succès !");
 }
 
 
