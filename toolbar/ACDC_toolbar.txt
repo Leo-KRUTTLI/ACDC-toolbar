@@ -282,7 +282,7 @@ label=MCZ
 icon=noicon
 arg=<macro>
 
-dirMacros = getDirectory("macros") + File.separator;
+dirMacros = getDirectory("macros") + "MACRO" + File.separator;
 fileName = "MACRO_MCZ.ijm";
 fullPath = dirMacros + fileName;
 
