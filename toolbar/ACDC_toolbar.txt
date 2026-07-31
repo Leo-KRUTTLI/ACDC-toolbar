@@ -1,13 +1,18 @@
 <stickToImageJ>
 <noGrid>
-<DnD> // allow droping images into the BoulinTab2 window to open them, just like Fiji tool bar
+<DnD> 
 
 <startupAction>
 
-
 url = "https://raw.githubusercontent.com/Leo-KRUTTLI/MCZ-marco/refs/heads/main/MACRO%20MCZ%20update%20version.ijm";
 
-dirMacros = getDirectory("macros"); // Ne pas ajouter File.separator ici
+dirMacros = getDirectory("macros") + MACRO + File.separator;
+
+if (!File.exists(dirMacros)) {
+    File.makeDirectory(dirMacros);
+    print("Dossier créé : " + dirMacros);
+}
+
 fileName = "MACRO_MCZ.ijm";
 fullPath = dirMacros + fileName;
 
@@ -27,7 +32,6 @@ if (startsWith(code, "<Error") || code == "") {
     File.saveString(code, fullPath);
     showStatus("Macro MCZ mise à jour avec succès !");
 }
-
 
 </startupAction>
 
@@ -289,7 +293,6 @@ runMacro(fullPath);
 }
 
 </macro>
-
 
 --------
 
