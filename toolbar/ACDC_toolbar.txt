@@ -10,7 +10,6 @@ dirMacros = getDirectory("macros") + "MACRO" + File.separator;
 
 if (!File.exists(dirMacros)) {
     File.makeDirectory(dirMacros);
-    print("Dossier créé : " + dirMacros);
 }
 
 fileName = "MACRO_MCZ.ijm";
