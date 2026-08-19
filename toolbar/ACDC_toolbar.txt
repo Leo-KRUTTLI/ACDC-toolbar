@@ -57,7 +57,7 @@ if (!File.exists(flagFile)) {
             "https://raw.githubusercontent.com/cleterrier/ChrisLUTs/refs/heads/master/I%20Magenta.lut",
             "https://raw.githubusercontent.com/cleterrier/ChrisLUTs/refs/heads/master/I%20Purple.lut",
             "https://raw.githubusercontent.com/cleterrier/ChrisLUTs/refs/heads/master/I%20Red.lut",
-            "https://raw.githubusercontent.com/cleterrier/ChrisLUTs/refs/heads/master/I%20Yellow.lut",
+            "https://raw.githubusercontent.com/cleterrier/ChrisLUTs/refs/heads/master/I%20Yellow.lut"
         );
         lutNames = newArray("BOP blue", "BOP orange", "BOP purple", "I blue", "I bordeaux", "I cyan", "I forest ", "I Green ", "I Magenta ", "I Purple ", "I Red ", "I Yellow ");
 
