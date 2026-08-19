@@ -64,25 +64,23 @@ if (!File.exists(flagFile)) {
             "I Purple.lut", "I Red.lut", "I Yellow.lut"
         );
 
-        // Désactive l'affichage d'images pendant le téléchargement
-        setBatchMode(true); 
-
         for (i = 0; i < lutURLs.length; i++) {
-            // Ouvrir l'URL binaire directement dans ImageJ
-            open(lutURLs[i]); 
-            // Sauvegarder la LUT nativement dans le dossier destination
-            saveAs("LUT", dirLuts + lutNames[i]); 
-            // Fermer la LUT en mémoire
-            close(); 
+            destPath = dirLuts + lutNames[i];
+            
+            // Sur Mac / Linux, curl télécharge directement le fichier binaire intact sur le disque
+            if (ij.IJ.isMacintosh() || ij.IJ.isLinux()) {
+                exec("curl", "-s", "-L", "-o", destPath, lutURLs[i]);
+            } else {
+                // Compatible Windows
+                exec("powershell", "-Command", "Invoke-WebRequest -Uri '" + lutURLs[i] + "' -OutFile '" + destPath + "'");
+            }
         }
-
-        setBatchMode(false);
         
         print("Les Chris LUTs ont été installées dans : " + dirLuts);
         showMessage("Installation terminée", "Les Chris LUTs sont installées ! Redémarrez Fiji pour qu'elles apparaissent dans Image > Lookup Tables.");
     }
 
-    // Fichier témoin enregistrant le choix
+    // Fichier témoin
     File.saveString("Question posée le : " + getTime(), flagFile);
 }
 </startupAction>
