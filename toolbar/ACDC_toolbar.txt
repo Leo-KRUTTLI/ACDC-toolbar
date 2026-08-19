@@ -64,14 +64,15 @@ if (!File.exists(flagFile)) {
             "I Purple.lut", "I Red.lut", "I Yellow.lut"
         );
 
+        // Détection de l'OS compatible avec le langage Macro
+        os = getInfo("os.name");
+
         for (i = 0; i < lutURLs.length; i++) {
             destPath = dirLuts + lutNames[i];
             
-            // Sur Mac / Linux, curl télécharge directement le fichier binaire intact sur le disque
-            if (ij.IJ.isMacintosh() || ij.IJ.isLinux()) {
+            if (startsWith(os, "Mac") || startsWith(os, "Linux")) {
                 exec("curl", "-s", "-L", "-o", destPath, lutURLs[i]);
             } else {
-                // Compatible Windows
                 exec("powershell", "-Command", "Invoke-WebRequest -Uri '" + lutURLs[i] + "' -OutFile '" + destPath + "'");
             }
         }
