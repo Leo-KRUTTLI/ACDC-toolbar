@@ -36,15 +36,12 @@ if (startsWith(code, "<Error") || code == "") {
 // 2. INSTALLATION OPTIONNELLE DES CHRIS LUTs
 // ==========================================
 dirLuts = getDirectory("luts");
-// Fichier témoin qui indique si la question a déjà été posée
 flagFile = getDirectory("macros") + ".chris_luts_asked.txt"; 
 
 if (!File.exists(flagFile)) {
-    // Pose la question uniquement si le fichier témoin n'existe pas
     installLUTs = getBoolean("Voulez-vous télécharger et installer les Chris LUTs ?");
 
     if (installLUTs) {
-        // Renseigne ici les liens RAW de tes LUTs et leurs noms de destination
         lutURLs = newArray(
             "https://raw.githubusercontent.com/cleterrier/ChrisLUTs/refs/heads/master/BOP%20blue.lut",
             "https://raw.githubusercontent.com/cleterrier/ChrisLUTs/refs/heads/master/BOP%20orange.lut",
@@ -59,21 +56,33 @@ if (!File.exists(flagFile)) {
             "https://raw.githubusercontent.com/cleterrier/ChrisLUTs/refs/heads/master/I%20Red.lut",
             "https://raw.githubusercontent.com/cleterrier/ChrisLUTs/refs/heads/master/I%20Yellow.lut"
         );
-        lutNames = newArray("BOP blue", "BOP orange", "BOP purple", "I blue", "I bordeaux", "I cyan", "I forest ", "I Green ", "I Magenta ", "I Purple ", "I Red ", "I Yellow ");
+        
+        lutNames = newArray(
+            "BOP blue.lut", "BOP orange.lut", "BOP purple.lut", 
+            "I blue.lut", "I bordeaux.lut", "I cyan.lut", 
+            "I forest.lut", "I Green.lut", "I Magenta.lut", 
+            "I Purple.lut", "I Red.lut", "I Yellow.lut"
+        );
+
+        // Désactive l'affichage d'images pendant le téléchargement
+        setBatchMode(true); 
 
         for (i = 0; i < lutURLs.length; i++) {
-            // Les .lut étant des fichiers binaires, il est préférable d'utiliser un mini-script 
-            // Java intégré pour éviter de les corrompre lors du téléchargement.
-            downloadCmd = "import java.nio.file.Files; import java.nio.file.Paths; import java.net.URL; import java.io.InputStream; try { InputStream in = new URL(\"" + lutURLs[i] + "\").openStream(); Files.copy(in, Paths.get(\"" + dirLuts + lutNames[i] + "\"), java.nio.file.StandardCopyOption.REPLACE_EXISTING); } catch(Exception e) { }";
-            eval("script", downloadCmd);
+            // Ouvrir l'URL binaire directement dans ImageJ
+            open(lutURLs[i]); 
+            // Sauvegarder la LUT nativement dans le dossier destination
+            saveAs("LUT", dirLuts + lutNames[i]); 
+            // Fermer la LUT en mémoire
+            close(); 
         }
+
+        setBatchMode(false);
         
-        print("Les Chris LUTs ont été installées dans le dossier luts.");
-        showMessage("Installation terminée", "Les Chris LUTs sont installées. Redémarrez Fiji pour qu'elles apparaissent dans les menus.");
+        print("Les Chris LUTs ont été installées dans : " + dirLuts);
+        showMessage("Installation terminée", "Les Chris LUTs sont installées ! Redémarrez Fiji pour qu'elles apparaissent dans Image > Lookup Tables.");
     }
 
-    // Création du fichier témoin (que la réponse ait été Oui ou Non)
-    // Ainsi, la boucle 'if (!File.exists(flagFile))' sera ignorée la prochaine fois.
+    // Fichier témoin enregistrant le choix
     File.saveString("Question posée le : " + getTime(), flagFile);
 }
 </startupAction>
